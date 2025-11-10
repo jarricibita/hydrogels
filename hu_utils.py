@@ -12,7 +12,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 import shap
-import umap
+import umap 
 from adjustText import adjust_text
 from icecream import ic
 from matplotlib import pyplot as plt
@@ -101,9 +101,12 @@ def rmse_calc(predictions, targets):
     return np.sqrt(((predictions - targets) ** 2).mean())
 
 
-class BestEstimatorCV:
+CREAN UNA CLASE PARA TENER TODA LA INFORMACIÓN RELATIVA A LOS DIFERENTES MODELOS ENTRENADOS EN UN
+MISMO SITIO
+class BestEstimatorCV: 
     """For containing the best_estimator and related stats, plots."""
 
+  AQUÍ SE CREA LA CLASE Y LOS ATRIBUTOS QUE TENDRÁN LOS DIFERENTES OBJETOS
     def __init__(self, cv, X, y, estimator, redc=False, random_state=929):
         """Prepare train, test data.
 
@@ -122,7 +125,7 @@ class BestEstimatorCV:
         self.random_state = random_state
         self.redc_model = redc
 
-    def output_stats(self):
+    def output_stats(self):   VA A SER UN MÉTODO DE LA CLASE BestEstimatorCV
         """Collect the RMSE stats.
         Conduct a 10-fold CV with shuffle for the current object. Collect the statistics.
         Want to shuffle. If not shuffle, then cross_val_score (cross_validate) is enough. (But can pass a Kfold(shuffle=True) object)
@@ -137,11 +140,11 @@ class BestEstimatorCV:
         Returns:
             _type_: _description_
         """
-        cvf = KFold(n_splits=self.cv, random_state=1126, shuffle=True)
+        cvf = KFold(n_splits=self.cv, random_state=1126, shuffle=True)  # SE PREPARA LA VALIDACIÓN CRUZADA
         model = self.estimator
         err_trn = []
         err_tes = []
-        r_2_tes = []
+        r_2_tes = []  SE CREAN LISTAS VACÍAS PARA IR GUARDANDO LAS MÉTRICAS
         r_2_trn = []
         mae_trn = []
         mae_tes = []
@@ -168,7 +171,7 @@ class BestEstimatorCV:
             point = pd.concat([x_tes, pd.Series(y_tes), pd.Series(x_tes_pred)], axis=1)
             test_point = pd.concat([test_point, point])  # Not used.
 
-            err_tes.append(mean_squared_error(x_tes_pred, y_tes))
+            err_tes.append(mean_squared_error(x_tes_pred, y_tes)) CALCULA ESTAS MÉTRICAS PARA CADA FOLD
             err_trn.append(mean_squared_error(x_trn_pred, y_trn))
             mae_tes.append(mean_absolute_error(x_tes_pred, y_tes))
             mae_trn.append(mean_absolute_error(x_trn_pred, y_trn))
@@ -196,7 +199,7 @@ class BestEstimatorCV:
                 np.array(r_2_tes).mean(),
             )
         )
-        ret = {}
+        ret = {}  EN ESTE DICCIONARIO SE GUARDAN LA MEDIA DE TODOS LOS FOLDS. ASÍ PARA CADA MÉTRICA
         ret[
             "trn_mean"
         ] = v_trn.mean()  # 5 fold mean. It's different from the overal rmse.
@@ -209,7 +212,8 @@ class BestEstimatorCV:
         ret["trn_mae"] = np.array(mae_trn).mean()
         return ret, v_tes.mean()
 
-    def output_stats_difference(self):
+    def output_stats_difference(self):   ESTE MÉTODO ES SIMILAR AL ANTERIOR, PERO ADEMÁS EVALÚA LAS 
+        DIFERENCIAS ENTRE VALORES REALES Y PREDICCIONES
         """Collect the RMSE stats.
         Conduct a 10-fold CV with shuffle for the current object. Collect the statistics.
         Want to shuffle. If not shuffle, then cross_val_score (cross_validate) is enough. (But can pass a Kfold(shuffle=True) object)
@@ -232,9 +236,9 @@ class BestEstimatorCV:
         r_2_trn = []
         mae_trn = []
         mae_tes = []
-        diff_collector = []
-        y_test_collector = []
-        y_pred_collector = []
+        diff_collector = []  DIFERENCIA ENTRE VALORES REALES Y PREDICHOS
+        y_test_collector = []  GUARDA TODOS LOS VALORES REALES
+        y_pred_collector = []  GUARDA TODAS LAS PREDICCIONES
         test_point = pd.DataFrame(columns=self.X.columns)
         for train_index, test_index in cvf.split(self.X):
             x_trn = pd.DataFrame(np.array(self.X)[train_index], columns=self.X.columns)
@@ -290,7 +294,7 @@ class BestEstimatorCV:
             )
         )
         diff_np = np.array(diff_collector)
-        min_idx = diff_np.argmin()
+        min_idx = diff_np.argmin()   ÍNDICES DONDE LAS DIFERENCIAS SON MÍNIMAS Y MÁXIMAS
         max_idx = diff_np.argmax()
         print(
             "Too optimistic case:", y_test_collector[min_idx], y_test_collector[max_idx]
@@ -304,6 +308,8 @@ class BestEstimatorCV:
         """For a BestEsitimatorCV object, plot a hold-out Truth-Pred fig.
         This only plot hold-out (not cv) Pred-Truth plot. (y_pred vs y_truth plot).
 
+  ESTE MÉTODO GENERA UN GRÁFICO DE VALORES REALES VS PREDICCIONES
+        
         Args:
             title (str, optional): Use obj.__class__.__name__ now.
             filename (str, optional): Store filename. Defaults to ''.
@@ -353,6 +359,8 @@ class BestEstimatorCV:
         """Like the importance variable used in fitted model.feature_importances_.
         plot_importance(X.columns, topk=6, fname='rf_feature_importance)
 
+    ESTE MÉTODO GRAFICA LAS IMPORTANCIAS DE LAS VARIABLES SEGÚN EL MODELO
+
         Args:
             ylabels (_type_): yaxis ticks labels.
             topk (_type_): _description_
@@ -378,6 +386,8 @@ class BestEstimatorCV:
 
 def plot_compared_methods_rmse(rmse_dict, type="rmse", updated=False):
     """plt.plot the comparison of rmse and std
+
+    ESTA FUNCIÓN SIRVE PARA COMPARAR DE MANERA VISUAL VARIOS MODELOS DE MACHINE LEARNING
 
     Args:
         rmse_dict (_type_): Contains all the rmse stats for each method.
